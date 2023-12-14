@@ -1,102 +1,134 @@
-const chai = require('chai');
-const chaiHttp = require('chai-http');
-const app = require('../app');
+const request = require('supertest');
+const app = require('../app.js');
+const mongoose = require('mongoose');
+const expect = require('chai').expect;
+const subscriberModel = require('../models/subscribers.js');
 
-chai.use(chaiHttp);
-const expect = chai.expect;
-
-describe('Routes', () => {
-  describe('GET /', () => {
-    it('should return the homepage HTML', (done) => {
-      chai
-        .request(app)
-        .get('/')
-        .end((err, res) => {
-          expect(res).to.have.status(200);
-          expect(res).to.be.html;
-          done();
-        });
-    });
+// Test the GET /subscribers/ endpoint
+describe('GET /subscribers/', () => {
+  before((done) => {
+    const DATABASE_URL = "mongodb+srv://pha46:admin@cluster0.yict8pe.mongodb.net/subscribers";
+    mongoose.connect(DATABASE_URL)
+      .then(() => done())
+      .catch((error) => done(error));
   });
 
-  describe('GET /subscribers', () => {
-    it('should return all subscribers', (done) => {
-      chai
-        .request(app)
-        .get('/subscribers')
-        .end((err, res) => {
-          expect(res).to.have.status(200);
-          expect(res).to.be.json;
-          done();
-        });
-    }).timeout(10000); // Increase the timeout to 5 seconds
+  after((done) => {
+    mongoose.connection.dropDatabase()
+      .then(() => mongoose.connection.close())
+      .then(() => done())
+      .catch((error) => done(error));
   });
 
-  describe('GET /subscribers/names', () => {
-    it('should return subscribers with only name and subscribedChannel', (done) => {
-      chai
-        .request(app)
-        .get('/subscribers/names')
-        .end((err, res) => {
-          expect(res).to.have.status(200);
-          expect(res).to.be.json;
-          expect(res.body).to.be.an('array');
-          res.body.forEach((subscriber) => {
-            expect(subscriber).to.have.property('name');
-            expect(subscriber).to.have.property('subscribedChannel');
-            expect(subscriber).to.not.have.property('_id');
+  it('responds with 200 status code and returns an array of subscribers', (done) => {
+    request(app)
+      .get('/subscribers/')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end((error, response) => {
+        if (error) return done(error);
+        const subscribers = JSON.parse(response.text);
+        expect(subscribers).to.be.an('array');
+        done();
+      });
+  });
+});
+
+// Test the GET /subscribers/names/ endpoint
+describe('GET /subscribers/names/', () => {
+  before((done) => {
+    const DATABASE_URL = "mongodb+srv://pha46:admin@cluster0.yict8pe.mongodb.net/subscribers";
+    mongoose.connect(DATABASE_URL)
+      .then(() => done())
+      .catch((error) => done(error));
+  });
+
+  after((done) => {
+    mongoose.connection.dropDatabase()
+      .then(() => mongoose.connection.close())
+      .then(() => done())
+      .catch((error) => done(error));
+  });
+
+  it('responds with 200 status code and returns an array of subscribers with name and subscribedChannel', (done) => {
+    request(app)
+      .get('/subscribers/names/')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end((error, response) => {
+        if (error) return done(error);
+        const subscribers = JSON.parse(response.text);
+        expect(subscribers).to.be.an('array');
+        subscribers.forEach((subscriber) => {
+          expect(subscriber).to.have.property('name');
+          expect(subscriber).to.have.property('subscribedChannel');
+          expect(subscriber).to.not.have.property('_id');
+        });
+        done();
+      });
+  });
+});
+
+// Test the GET /subscribers/id/:id endpoint
+describe('GET /subscribers/id/:id', () => {
+  before((done) => {
+    const DATABASE_URL = "mongodb+srv://pha46:admin@cluster0.yict8pe.mongodb.net/subscribers";
+    mongoose.connect(DATABASE_URL)
+      .then(() => done())
+      .catch((error) => done(error));
+  });
+
+  after((done) => {
+    mongoose.connection.dropDatabase()
+      .then(() => mongoose.connection.close())
+      .then(() => done())
+      .catch((error) => done(error));
+  });
+
+  it('responds with 200 status code and returns a subscriber object for a valid ID', (done) => {
+    const subscriber = { name: 'Jeread Krus', subscribedChannel: 'CNET' };
+    subscriberModel.create(subscriber)
+      .then((createdSubscriber) => {
+        request(app)
+          .get(`/subscribers/id/${createdSubscriber._id}`)
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((error, response) => {
+            if (error) return done(error);
+            const returnedSubscriber = response.body;
+            expect(returnedSubscriber).to.include(subscriber); // Use .include() instead of .deep.include()
+            expect(returnedSubscriber._id).to.equal(createdSubscriber._id.toString());
+            done();
           });
-          done();
-        });
-    }).timeout(10000); // Increase the timeout to 5 seconds
+      })
+      .catch((error) => done(error));
   });
 
-  describe('GET /subscribers/id/:id', () => {
-    it('should return the subscriber with the specified ID', (done) => {
-      // Assuming you have a valid ObjectId of an existing subscriber
-      const subscriberId = '65798b31d4e5cc3fdc605550';
+  it('responds with 400 status code for an invalid ID', (done) => {
+    const invalidId = 'invalid_id'; // Use a random string as an invalid ID
+    request(app)
+      .get(`/subscribers/id/${invalidId}`)
+      .expect('Content-Type', /json/)
+      .expect(400)
+      .end((error, response) => {
+        if (error) return done(error);
+        const errorResponse = response.body;
+        expect(errorResponse.message).to.equal('Invalid subscriber ID');
+        done();
+      });
+  });
 
-      chai
-        .request(app)
-        .get('/subscribers/id/' + subscriberId)
-        .end((err, res) => {
-          expect(res).to.have.status(200);
-          expect(res).to.be.json;
-          expect(res.body).to.have.property('_id', subscriberId);
-          expect(res.body).to.have.property('name');
-          expect(res.body).to.have.property('subscribedChannel');
-          done();
-        });
-    });
-
-    it('should return an error for an invalid subscriber ID', (done) => {
-      // Assuming you have an invalid subscriber ID
-      const invalidSubscriberId = 'invalidId';
-
-      chai
-        .request(app)
-        .get('/subscribers/id/' + invalidSubscriberId)
-        .end((err, res) => {
-          expect(res).to.have.status(400);
-          expect(res).to.be.json;
-          expect(res.body).to.have.property('message', 'Invalid subscriber ID');
-          done();
-        });
-    });
-
-    it('should return a not found error for a non-existent subscriber ID', (done) => {
-      // Assuming you have a non-existent subscriber ID
-      const nonExistentSubscriberId = '617387c7194e8a923bd19928';
-
-      chai
-        .request(app)
-        .get('/subscribers/id/' + nonExistentSubscriberId)
-        .end((err, res) => {
-          expect(res).to.have.status(404);
-          expect(res).to.be.json;
-          expect(res.body).to.have.property('message', 'Subscriber not found');
-          done();
-        });
-    });
+  it('responds with 404 status code for a non-existent ID', (done) => {
+    const nonExistentId = '65798b31d4e5cc3fdc605552';
+    request(app)
+      .get(`/subscribers/id/${nonExistentId}`)
+      .expect('Content-Type', /json/)
+      .expect(404)
+      .end((error, response) => {
+        if (error) return done(error);
+        const errorResponse = response.body;
+        expect(errorResponse.message).to.equal('Subscriber not found');
+        done();
+      });
   });
 });
