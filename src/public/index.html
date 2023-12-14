@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GetYouTube Subscribers Homepage</title>
+    <style>
+        body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f8f8f8;
+        margin: 0;
+        }
+
+        .container {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+  
+        h1 { color: #333; }
+        ul li { margin-bottom: 10px; }
+  
+        input[type="text"] {
+          padding: 5px;
+          font-size: 16px;
+          border: 1px solid #ccc;
+        }
+  
+        button {
+          padding: 5px 10px;
+          font-size: 16px;
+          background-color: #007bff;
+          color: #fff;
+          border: none;
+          cursor: pointer;
+        }
+  
+        #message {
+          color: red;
+        }
+      </style>
+    <script>
+      function getSubscriber() {
+          var id = document.getElementById("subscriberId").value;
+
+          // Check if the input is empty
+          if (id === "") {
+            document.getElementById("message").textContent = "Please enter a subscriber ID";
+            return;
+          }
+
+          window.location.href = "/subscribers/id/" + id;
+        }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+        <h1>Welcome to the GetYouTube Subscribers homepage!</h1>
+        <ul>
+          <li><a href="/subscribers">View All Subscribers</a></li>
+          <li><a href="/subscribers/names">View Subscribers with Names and Channels</a></li>
+        </ul>
+        <div style="margin-left: 10px;">
+            /subscribers/id/
+            <input type="text" id="subscriberId" name="id" required>
+            <button onclick="getSubscriber()">submit</button>
+            <span id="message"></span>
+        </div>
+    </div>
+  </body>
+</html>
