@@ -51,7 +51,8 @@
             return;
           }
 
-          window.location.href = "/subscribers/id/" + id, "_blank";
+          var url = "/subscribers/id/" + id;
+          window.open(url, "_blank");
         }
     </script>
   </head>
