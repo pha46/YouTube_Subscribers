@@ -15,7 +15,7 @@ PORT: Port number on which the API will run (default is 3000)
 
 # Usage
 Start the application from the root directory: node src/index.js
-The API will be accessible at http://localhost:<PORT>/
+The API will be accessible at http://localhost:3000/
 
 # API Routes
 To retrieve all subscribers data: GET /subscribers
