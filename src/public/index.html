@@ -51,7 +51,7 @@
             return;
           }
 
-          window.location.href = "/subscribers/id/" + id;
+          window.location.href = "/subscribers/id/" + id, "_blank";
         }
     </script>
   </head>
@@ -59,14 +59,17 @@
     <div class="container">
         <h1>Welcome to the GetYouTube Subscribers homepage!</h1>
         <ul>
-          <li><a href="/subscribers">View All Subscribers</a></li>
-          <li><a href="/subscribers/names">View Subscribers with Names and Channels</a></li>
+          <li><a href="/subscribers" target="_blank">View All Subscribers</a></li>
+          <li><a href="/subscribers/names" target="_blank">View Subscribers with Names and Channels</a></li>
         </ul>
         <div style="margin-left: 10px;">
             /subscribers/id/
             <input type="text" id="subscriberId" name="id" required>
             <button onclick="getSubscriber()">submit</button>
             <span id="message"></span>
+        </div>
+        <div>
+          <button onclick="window.open('https://documenter.getpostman.com/view/31795607/2s9Ykkg3Vj', '_blank')">API Documentation</button>
         </div>
     </div>
   </body>

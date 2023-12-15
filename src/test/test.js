@@ -14,8 +14,7 @@ describe('GET /subscribers/', () => {
   });
 
   after((done) => {
-    mongoose.connection.dropDatabase()
-      .then(() => mongoose.connection.close())
+    mongoose.connection.close()
       .then(() => done())
       .catch((error) => done(error));
   });
@@ -44,8 +43,7 @@ describe('GET /subscribers/names/', () => {
   });
 
   after((done) => {
-    mongoose.connection.dropDatabase()
-      .then(() => mongoose.connection.close())
+    mongoose.connection.close()
       .then(() => done())
       .catch((error) => done(error));
   });
@@ -79,8 +77,7 @@ describe('GET /subscribers/id/:id', () => {
   });
 
   after((done) => {
-    mongoose.connection.dropDatabase()
-      .then(() => mongoose.connection.close())
+    mongoose.connection.close()
       .then(() => done())
       .catch((error) => done(error));
   });
@@ -96,7 +93,7 @@ describe('GET /subscribers/id/:id', () => {
           .end((error, response) => {
             if (error) return done(error);
             const returnedSubscriber = response.body;
-            expect(returnedSubscriber).to.include(subscriber); // Use .include() instead of .deep.include()
+            expect(returnedSubscriber).to.include(subscriber);
             expect(returnedSubscriber._id).to.equal(createdSubscriber._id.toString());
             done();
           });
@@ -104,8 +101,9 @@ describe('GET /subscribers/id/:id', () => {
       .catch((error) => done(error));
   });
 
+  // For Invalid input ID
   it('responds with 400 status code for an invalid ID', (done) => {
-    const invalidId = 'invalid_id'; // Use a random string as an invalid ID
+    const invalidId = 'invalidsubscriberid'; // Use a random string as an invalid ID
     request(app)
       .get(`/subscribers/id/${invalidId}`)
       .expect('Content-Type', /json/)
@@ -118,8 +116,9 @@ describe('GET /subscribers/id/:id', () => {
       });
   });
 
+  // For ID which is not exist in database
   it('responds with 404 status code for a non-existent ID', (done) => {
-    const nonExistentId = '65798b31d4e5cc3fdc605552';
+    const nonExistentId = '65798b31d4e5cc3fdc605552'; // ID which is not exist in database
     request(app)
       .get(`/subscribers/id/${nonExistentId}`)
       .expect('Content-Type', /json/)

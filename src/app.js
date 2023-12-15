@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
 });
 
 // GET all subscribers
-app.get('/subscribers/', async (req, res) => {
+app.get('/subscribers', async (req, res) => {
   try {
     const subscribers = await subscriberModel.find();
     const formattedResponse = JSON.stringify(subscribers, null, 2);
@@ -35,7 +35,7 @@ app.get('/subscribers/', async (req, res) => {
 });
 
 // GET subscribers with only name and subscribedChannel
-app.get('/subscribers/names/', async (req, res) => {
+app.get('/subscribers/names', async (req, res) => {
   try {
     const subscribers = await subscriberModel.find({}, { name: 1, subscribedChannel: 1, _id: 0 });
     const formattedResponse = JSON.stringify(subscribers, null, 2);
@@ -45,6 +45,7 @@ app.get('/subscribers/names/', async (req, res) => {
   }
 });
 
+// GET subscribers with their id
 app.get('/subscribers/id/:id', async (req, res) => {
     try {
       const { id } = req.params;
@@ -56,6 +57,7 @@ app.get('/subscribers/id/:id', async (req, res) => {
   
       const subscriber = await subscriberModel.findById(id);
   
+      // Check if the provided id is not in the database 
       if (!subscriber) {
         return res.status(404).json({ message: 'Subscriber not found' });
       }
